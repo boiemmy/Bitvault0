@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sophia Petal — Demo Wallet</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #16161f;
+    --border: #2a2a3a;
+    --accent: #f7931a;
+    --accent2: #ffb347;
+    --green: #00e676;
+    --red: #ff4444;
+    --blue: #4fc3f7;
+    --text: #f0f0f8;
+    --muted: #7070a0;
+    --glow: rgba(247,147,26,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG Grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(247,147,26,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(247,147,26,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── LOGIN ── */
+  #loginScreen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; position: relative; z-index: 1;
+    padding: 20px;
+  }
+
+  .login-wrap {
+    width: 100%; max-width: 440px;
+  }
+
+  .brand {
+    text-align: center; margin-bottom: 40px;
+  }
+
+  .brand-logo {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 32px; margin-bottom: 16px;
+    box-shadow: 0 0 40px rgba(247,147,26,0.4);
+    animation: pulse-logo 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-logo {
+    0%,100% { box-shadow: 0 0 40px rgba(247,147,26,0.4); }
+    50% { box-shadow: 0 0 70px rgba(247,147,26,0.7); }
+  }
+
+  .brand h1 {
+    font-size: 2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -1px;
+  }
+
+  .brand p { color: var(--muted); font-size: 0.85rem; margin-top: 4px; font-family: 'Space Mono', monospace; }
+
+  .login-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  }
+
+  .login-card h2 { font-size: 1.2rem; margin-bottom: 8px; font-weight: 700; }
+  .login-card .sub { color: var(--muted); font-size: 0.8rem; margin-bottom: 24px; font-family: 'Space Mono', monospace; }
+
+  .user-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 24px;
+  }
+
+  .user-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    color: var(--text);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .user-btn:hover, .user-btn.selected {
+    border-color: var(--accent);
+    background: rgba(247,147,26,0.08);
+  }
+
+  .user-btn.selected::after {
+    content: '✓';
+    position: absolute; top: 8px; right: 10px;
+    color: var(--accent); font-size: 14px; font-weight: 700;
+  }
+
+  .user-btn .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; margin-bottom: 8px;
+  }
+
+  .user-btn .uname { font-size: 0.85rem; font-weight: 700; }
+  .user-btn .ubal { font-size: 0.72rem; color: var(--accent); font-family: 'Space Mono', monospace; }
+
+  .divider { text-align: center; color: var(--muted); font-size: 0.75rem; margin: 16px 0; letter-spacing: 2px; }
+
+  .input-wrap { margin-bottom: 16px; }
+  .input-wrap label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase; }
+  .input-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-family: 'Space Mono', monospace;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .input-wrap input:focus { border-color: var(--accent); }
+  .input-wrap input::placeholder { color: var(--muted); }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 12px;
+    padding: 14px;
+    color: #0a0a0f;
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(247,147,26,0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(247,147,26,0.5);
+  }
+
+  .btn-primary:active { transform: translateY(0); }
+
+  .demo-note {
+    text-align: center; margin-top: 16px;
+    font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace;
+  }
+
+  /* ── APP ── */
+  #app { display: none; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* TOP NAV */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px;
+    background: rgba(10,10,15,0.9);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(20px);
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .topbar-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 800; font-size: 1.1rem;
+  }
+
+  .topbar-brand .mini-logo {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  .user-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 14px 6px 8px;
+    cursor: pointer;
+    transition: border 0.2s;
+    font-size: 0.85rem;
+  }
+
+  .user-chip:hover { border-color: var(--accent); }
+  .user-chip .chip-avatar { font-size: 18px; }
+
+  .logout-btn {
+    background: none; border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 12px;
+    color: var(--muted); font-size: 0.78rem;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Space Mono', monospace;
+  }
+  .logout-btn:hover { border-color: var(--red); color: var(--red); }
+
+  /* MAIN LAYOUT */
+  .main {
+    max-width: 1100px; margin: 0 auto;
+    padding: 32px 24px;
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+  }
+
+  /* BALANCE CARD */
+  .balance-card {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border: 1px solid rgba(247,147,26,0.2);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .balance-card::before {
+    content: '₿';
+    position: absolute; top: -20px; right: -10px;
+    font-size: 160px; opacity: 0.04;
+    font-weight: 700; color: var(--accent);
+    pointer-events: none;
+  }
+
+  .balance-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .balance-btc {
+    font-size: 2.8rem; font-weight: 800; line-height: 1;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .balance-usd { font-size: 1rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  .balance-actions { display: flex; gap: 12px; margin-top: 24px; }
+
+  .bal-btn {
+    flex: 1;
+    border: none; border-radius: 12px;
+    padding: 13px;
+    font-size: 0.85rem; font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: all 0.2s;
+  }
+
+  .bal-btn.send {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #0a0a0f;
+    box-shadow: 0 4px 20px rgba(247,147,26,0.3);
+  }
+
+  .bal-btn.send:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(247,147,26,0.5); }
+
+  .bal-btn.receive {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .bal-btn.receive:hover { border-color: var(--accent); background: rgba(247,147,26,0.05); }
+
+  /* ADDRESS */
+  .addr-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 16px 20px;
+    margin-bottom: 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+  }
+
+  .addr-label { font-size: 0.7rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+  .addr-val { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--blue); word-break: break-all; }
+
+  .copy-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px;
+    color: var(--muted); font-size: 0.75rem;
+    cursor: pointer; white-space: nowrap;
+    transition: all 0.2s; font-family: 'Space Mono', monospace;
+  }
+
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* STATS ROW */
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+    text-align: center;
+  }
+
+  .stat-val { font-size: 1.3rem; font-weight: 700; font-family: 'Space Mono', monospace; }
+  .stat-label { font-size: 0.7rem; color: var(--muted); margin-top: 4px; letter-spacing: 1px; text-transform: uppercase; }
+
+  /* TX LIST */
+  .section-title {
+    font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px;
+  }
+
+  .tx-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .tx-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+    display: flex; align-items: center; gap: 14px;
+    transition: all 0.2s;
+    animation: slide-in 0.3s ease;
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .tx-item:hover { border-color: var(--border); background: #1a1a25; }
+
+  .tx-icon {
+    width: 40px; height: 40px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+
+  .tx-icon.out { background: rgba(255,68,68,0.12); }
+  .tx-icon.in { background: rgba(0,230,118,0.12); }
+
+  .tx-info { flex: 1; min-width: 0; }
+  .tx-title { font-size: 0.88rem; font-weight: 600; margin-bottom: 3px; }
+  .tx-meta { font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+  .tx-hash { font-size: 0.65rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .tx-amount { text-align: right; }
+  .tx-amount .btc { font-family: 'Space Mono', monospace; font-weight: 700; font-size: 0.88rem; }
+  .tx-amount .btc.out { color: var(--red); }
+  .tx-amount .btc.in { color: var(--green); }
+  .tx-amount .usd { font-size: 0.7rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+  .tx-status {
+    font-size: 0.65rem; padding: 3px 8px; border-radius: 100px;
+    font-family: 'Space Mono', monospace; margin-top: 4px; display: inline-block;
+  }
+  .tx-status.confirmed { background: rgba(0,230,118,0.12); color: var(--green); }
+  .tx-status.pending { background: rgba(247,147,26,0.12); color: var(--accent); }
+
+  /* SEND PANEL */
+  .panel {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 24px;
+    height: fit-content;
+    position: sticky; top: 90px;
+  }
+
+  .panel h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+  .panel .panel-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 20px; font-family: 'Space Mono', monospace; }
+
+  .amount-input-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+    margin-bottom: 12px;
+    transition: border 0.2s;
+  }
+
+  .amount-input-wrap:focus-within { border-color: var(--accent); }
+
+  .amount-input-wrap label { font-size: 0.7rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; display: block; margin-bottom: 6px; }
+
+  .amount-row { display: flex; align-items: center; gap: 8px; }
+
+  .amount-input-wrap input[type="number"] {
+    flex: 1; background: none; border: none; outline: none;
+    font-size: 1.4rem; font-weight: 700;
+    font-family: 'Space Mono', monospace;
+    color: var(--text); width: 100%;
+  }
+
+  .amount-input-wrap input[type="number"]::-webkit-outer-spin-button,
+  .amount-input-wrap input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .unit-badge {
+    background: rgba(247,147,26,0.15); color: var(--accent);
+    border-radius: 8px; padding: 4px 10px;
+    font-size: 0.75rem; font-weight: 700;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .usd-equiv { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; margin-top: 4px; }
+
+  .network-fee {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 0.78rem; margin-bottom: 12px;
+    color: var(--muted);
+  }
+
+  .network-fee span:last-child { font-family: 'Space Mono', monospace; color: var(--text); }
+
+  .quick-amounts { display: flex; gap: 6px; margin-bottom: 12px; }
+  .quick-btn {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 4px;
+    color: var(--muted); font-size: 0.7rem;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Space Mono', monospace;
+  }
+  .quick-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* RECIPIENT */
+  .recipient-select {
+    margin-bottom: 12px;
+  }
+
+  .recipient-label { font-size: 0.7rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; display: block; }
+
+  .recipient-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .recipient-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+
+  .recipient-item:hover, .recipient-item.selected {
+    border-color: var(--accent); background: rgba(247,147,26,0.05);
+  }
+
+  .recipient-item .r-name { font-size: 0.83rem; font-weight: 600; }
+  .recipient-item .r-addr { font-size: 0.65rem; font-family: 'Space Mono', monospace; color: var(--muted); }
+
+  .custom-addr-wrap { margin-top: 6px; }
+  .custom-addr-wrap input {
+    width: 100%;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 12px;
+    color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.72rem;
+    outline: none; transition: border 0.2s;
+  }
+  .custom-addr-wrap input:focus { border-color: var(--accent); }
+  .custom-addr-wrap input::placeholder { color: var(--muted); }
+
+  /* CONFIRM MODAL */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    z-index: 999;
+    align-items: center; justify-content: center;
+  }
+
+  .modal-overlay.show { display: flex; }
+
+  .modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 32px;
+    max-width: 420px; width: 90%;
+    animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes modal-in {
+    from { opacity: 0; transform: scale(0.85); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .modal h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 4px; }
+  .modal .modal-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 24px; font-family: 'Space Mono', monospace; }
+
+  .confirm-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px;
+    margin-bottom: 8px;
+    display: flex; justify-content: space-between;
+    font-size: 0.83rem;
+  }
+
+  .confirm-row .cr-label { color: var(--muted); }
+  .confirm-row .cr-val { font-family: 'Space Mono', monospace; font-weight: 600; }
+
+  .confirm-row.total { border-color: rgba(247,147,26,0.3); background: rgba(247,147,26,0.05); }
+  .confirm-row.total .cr-val { color: var(--accent); font-size: 1rem; }
+
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+
+  .btn-cancel {
+    flex: 1; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 13px;
+    color: var(--text); font-weight: 700; font-size: 0.85rem;
+    cursor: pointer; font-family: 'Syne', sans-serif;
+    transition: all 0.2s;
+  }
+
+  .btn-cancel:hover { border-color: var(--red); color: var(--red); }
+
+  .btn-confirm {
+    flex: 2;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 12px; padding: 13px;
+    color: #0a0a0f; font-weight: 800; font-size: 0.9rem;
+    cursor: pointer; font-family: 'Syne', sans-serif;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(247,147,26,0.3);
+  }
+
+  .btn-confirm:hover { box-shadow: 0 8px 30px rgba(247,147,26,0.5); }
+
+  /* RECEIPT MODAL */
+  .receipt {
+    background: var(--card); border: 1px solid rgba(0,230,118,0.3);
+    border-radius: 24px; padding: 32px;
+    max-width: 420px; width: 90%;
+    text-align: center;
+    animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .receipt-icon {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(0,230,118,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px; margin: 0 auto 16px;
+    animation: check-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  }
+
+  @keyframes check-pop {
+    from { transform: scale(0); }
+    to { transform: scale(1); }
+  }
+
+  .receipt h3 { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; color: var(--green); }
+  .receipt .r-sub { font-size: 0.78rem; color: var(--muted); margin-bottom: 24px; font-family: 'Space Mono', monospace; }
+
+  .receipt-amount {
+    font-size: 2.2rem; font-weight: 800;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent); margin-bottom: 4px;
+  }
+
+  .receipt-usd { color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.85rem; margin-bottom: 20px; }
+
+  .receipt-details { text-align: left; margin-bottom: 20px; }
+
+  .receipt-hash {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px;
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    color: var(--blue); word-break: break-all; margin-bottom: 12px;
+    text-align: center;
+  }
+
+  .receipt-hash-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; text-align: center; margin-bottom: 6px; }
+
+  .r-detail-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.78rem; padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .r-detail-row:last-child { border-bottom: none; }
+  .r-detail-row .r-dl { color: var(--muted); }
+  .r-detail-row .r-dv { font-family: 'Space Mono', monospace; }
+
+  .btn-close {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none; border-radius: 12px; padding: 14px;
+    color: #0a0a0f; font-weight: 800; font-size: 0.9rem;
+    cursor: pointer; font-family: 'Syne', sans-serif;
+  }
+
+  /* RECEIVE MODAL */
+  .receive-modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 24px; padding: 32px;
+    max-width: 380px; width: 90%;
+    text-align: center;
+    animation: modal-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .receive-modal h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+  .receive-modal .r-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 20px; font-family: 'Space Mono', monospace; }
+
+  .qr-code {
+    width: 180px; height: 180px;
+    background: white; border-radius: 12px;
+    margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px;
+  }
+
+  .qr-code svg { width: 100%; height: 100%; }
+
+  .addr-display {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px;
+    font-family: 'Space Mono', monospace; font-size: 0.65rem;
+    color: var(--blue); word-break: break-all; margin-bottom: 12px;
+  }
+
+  /* NOTIFICATION */
+  .notif {
+    position: fixed; top: 80px; right: 20px; z-index: 9999;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.85rem; font-weight: 600;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    transform: translateX(120%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 320px;
+  }
+
+  .notif.show { transform: translateX(0); }
+  .notif.green { border-color: rgba(0,230,118,0.4); }
+  .notif.orange { border-color: rgba(247,147,26,0.4); }
+  .notif.red { border-color: rgba(255,68,68,0.4); }
+
+  /* INCOMING ALERT */
+  .incoming-alert {
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-120%);
+    z-index: 9998;
+    background: linear-gradient(135deg, rgba(0,230,118,0.15), rgba(0,230,118,0.05));
+    border: 1px solid rgba(0,230,118,0.4);
+    border-radius: 16px; padding: 16px 24px;
+    text-align: center;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    backdrop-filter: blur(20px);
+    min-width: 300px;
+  }
+
+  .incoming-alert.show { transform: translateX(-50%) translateY(0); }
+  .incoming-alert .ia-label { font-size: 0.72rem; color: var(--green); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+  .incoming-alert .ia-amount { font-size: 1.4rem; font-weight: 800; font-family: 'Space Mono', monospace; color: var(--green); }
+  .incoming-alert .ia-from { font-size: 0.75rem; color: var(--muted); margin-top: 2px; font-family: 'Space Mono', monospace; }
+
+  /* PEOPLE HELPED */
+  .helped-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px;
+    margin-bottom: 20px;
+  }
+
+  .helped-title { font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+
+  .helped-list { display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
+
+  .helped-list::-webkit-scrollbar { width: 4px; }
+  .helped-list::-webkit-scrollbar-track { background: var(--surface); border-radius: 2px; }
+  .helped-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .helped-item {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 0.8rem;
+    animation: slide-in 0.3s ease;
+  }
+
+  .helped-item .h-avatar { font-size: 20px; }
+  .helped-item .h-name { font-weight: 600; flex: 1; }
+  .helped-item .h-msg { font-size: 0.72rem; color: var(--muted); }
+  .helped-item .h-tag { font-size: 0.65rem; background: rgba(0,230,118,0.12); color: var(--green); padding: 2px 8px; border-radius: 100px; font-family: 'Space Mono', monospace; }
+
+  /* RIGHT COL */
+  .right-col { display: flex; flex-direction: column; gap: 16px; }
+
+  .empty-tx { text-align: center; padding: 40px 20px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.8rem; }
+
+  /* TICKER */
+  .price-ticker {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 8px 24px;
+    display: flex; gap: 24px; overflow: hidden;
+    font-family: 'Space Mono', monospace; font-size: 0.72rem;
+  }
+
+  .tick-item { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+  .tick-item .t-label { color: var(--muted); }
+  .tick-item .t-val { color: var(--text); }
+  .tick-item .t-change.up { color: var(--green); }
+  .tick-item .t-change.down { color: var(--red); }
+
+  @media (max-width: 800px) {
+    .main { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr 1fr 1fr; }
+    .panel { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="brand">
+      <div class="brand-logo">₿</div>
+      <h1>Sophia Petal</h1>
+      <p>// DEMO CRYPTO WALLET v2.4.1</p>
+    </div>
+    <div class="login-card">
+      <h2>Select Account</h2>
+      <p class="sub">// choose a demo wallet to log into</p>
+      <div class="user-grid" id="userGrid"></div>
+      <div class="divider">─── OR ENTER PASSCODE ───</div>
+      <div class="input-wrap">
+        <label>Passcode</label>
+        <input type="password" id="passcodeInput" placeholder="Enter 4-digit PIN" maxlength="4">
+      </div>
+      <button class="btn-primary" onclick="doLogin()">Unlock Wallet →</button>
+      <p class="demo-note">⚠ DEMO MODE — All balances are simulated. No real crypto.</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- TICKER -->
+  <div class="price-ticker">
+    <div class="tick-item"><span class="t-label">BTC/USD</span><span class="t-val" id="btcPrice">$67,432.00</span><span class="t-change up" id="btcChange">+2.4%</span></div>
+    <div class="tick-item"><span class="t-label">ETH/USD</span><span class="t-val">$3,847.22</span><span class="t-change up">+1.8%</span></div>
+    <div class="tick-item"><span class="t-label">Network</span><span class="t-val">Bitcoin Mainnet</span></div>
+    <div class="tick-item"><span class="t-label">Mempool</span><span class="t-val">12,847 txns</span></div>
+    <div class="tick-item"><span class="t-label">Block Height</span><span class="t-val" id="blockHeight">842,391</span></div>
+    <div class="tick-item"><span class="t-label">Fee Rate</span><span class="t-val">18 sat/vB</span></div>
+  </div>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="mini-logo">₿</div>
+      Sophia Petal
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <div class="user-chip">
+        <span class="chip-avatar" id="chipAvatar">👤</span>
+        <span id="chipName">User</span>
+      </div>
+      <button class="logout-btn" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- LEFT -->
+    <div>
+      <!-- BALANCE CARD -->
+      <div class="balance-card">
+        <div class="balance-label">Total Balance</div>
+        <div class="balance-btc" id="balBTC">0.00000000 ₿</div>
+        <div class="balance-usd" id="balUSD">≈ $0.00 USD</div>
+        <div class="balance-actions">
+          <button class="bal-btn send" onclick="openSend()">⬆ Send BTC</button>
+          <button class="bal-btn receive" onclick="openReceive()">⬇ Receive</button>
+        </div>
+      </div>
+
+      <!-- ADDRESS -->
+      <div class="addr-card">
+        <div style="min-width:0;">
+          <div class="addr-label">Your Wallet Address</div>
+          <div class="addr-val" id="myAddr">—</div>
+        </div>
+        <button class="copy-btn" onclick="copyAddr()">Copy</button>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--green)" id="statReceived">0.00</div>
+          <div class="stat-label">BTC Received</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--red)" id="statSent">0.00</div>
+          <div class="stat-label">BTC Sent</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="statTxCount">0</div>
+          <div class="stat-label">Transactions</div>
+        </div>
+      </div>
+
+      <!-- PEOPLE HELPED -->
+      <div class="helped-card">
+        <div class="helped-title">People Who Received Transfers</div>
+        <div class="helped-list" id="helpedList">
+          <div style="color:var(--muted);font-size:0.78rem;text-align:center;padding:10px;font-family:'Space Mono',monospace;">No transfers yet</div>
+        </div>
+      </div>
+
+      <!-- TX HISTORY -->
+      <div>
+        <div class="section-title">Transaction History</div>
+        <div class="tx-list" id="txList">
+          <div class="empty-tx">// No transactions yet<br>Start by sending or receiving BTC</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: SEND PANEL -->
+    <div class="right-col">
+      <div class="panel" id="sendPanel">
+        <h3>Send Bitcoin</h3>
+        <p class="panel-sub">// Transfer BTC to any wallet</p>
+
+        <label class="recipient-label">Select Recipient</label>
+        <div class="recipient-list" id="recipientList"></div>
+
+        <div class="custom-addr-wrap" style="margin-bottom:12px;">
+          <input type="text" id="customAddrInput" placeholder="Or paste wallet address (bc1q...)" oninput="selectCustomAddr()">
+        </div>
+
+        <div class="amount-input-wrap">
+          <label>Amount</label>
+          <div class="amount-row">
+            <input type="number" id="sendAmount" placeholder="0.00000000" step="0.00001" oninput="updateAmountPreview()" min="0.00001">
+            <span class="unit-badge">BTC</span>
+          </div>
+          <div class="usd-equiv" id="usdEquiv">≈ $0.00 USD</div>
+        </div>
+
+        <div class="quick-amounts">
+          <button class="quick-btn" onclick="setQuick(0.001)">0.001</button>
+          <button class="quick-btn" onclick="setQuick(0.005)">0.005</button>
+          <button class="quick-btn" onclick="setQuick(0.01)">0.01</button>
+          <button class="quick-btn" onclick="setMaxSend()">MAX</button>
+        </div>
+
+        <div class="network-fee">
+          <span>⚡ Network Fee (est.)</span>
+          <span>0.00002400 BTC</span>
+        </div>
+
+        <button class="btn-primary" onclick="initiateSend()">Review Transaction →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <h3>Confirm Transaction</h3>
+    <p class="modal-sub">// Review before broadcasting</p>
+    <div class="confirm-row"><span class="cr-label">To</span><span class="cr-val" id="cTo">—</span></div>
+    <div class="confirm-row"><span class="cr-label">Address</span><span class="cr-val" id="cAddr" style="font-size:0.65rem">—</span></div>
+    <div class="confirm-row"><span class="cr-label">Amount</span><span class="cr-val" id="cAmt">—</span></div>
+    <div class="confirm-row"><span class="cr-label">Network Fee</span><span class="cr-val">0.00002400 BTC</span></div>
+    <div class="confirm-row total"><span class="cr-label">Total Deducted</span><span class="cr-val" id="cTotal">—</span></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm" onclick="executeTransfer()">Confirm & Send ₿</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div class="modal-overlay" id="receiptModal">
+  <div class="receipt">
+    <div class="receipt-icon">✓</div>
+    <h3>Transfer Sent!</h3>
+    <p class="r-sub">// Transaction broadcast to Bitcoin network</p>
+    <div class="receipt-amount" id="rAmt">—</div>
+    <div class="receipt-usd" id="rUsd">—</div>
+    <div class="receipt-details">
+      <div class="receipt-hash-label">Transaction ID</div>
+      <div class="receipt-hash" id="rHash">—</div>
+      <div class="r-detail-row"><span class="r-dl">To</span><span class="r-dv" id="rTo">—</span></div>
+      <div class="r-detail-row"><span class="r-dl">Address</span><span class="r-dv" id="rAddr" style="font-size:0.65rem">—</span></div>
+      <div class="r-detail-row"><span class="r-dl">Fee</span><span class="r-dv">0.00002400 BTC</span></div>
+      <div class="r-detail-row"><span class="r-dl">Status</span><span class="r-dv" style="color:var(--accent)">⏳ Pending Confirmation</span></div>
+      <div class="r-detail-row"><span class="r-dl">Timestamp</span><span class="r-dv" id="rTime">—</span></div>
+      <div class="r-detail-row"><span class="r-dl">Block</span><span class="r-dv">Awaiting inclusion...</span></div>
+    </div>
+    <button class="btn-close" onclick="closeReceipt()">Done ✓</button>
+  </div>
+</div>
+
+<!-- RECEIVE MODAL -->
+<div class="modal-overlay" id="receiveModal">
+  <div class="receive-modal">
+    <h3>Receive Bitcoin</h3>
+    <p class="r-sub">// Share this address to receive BTC</p>
+    <div class="qr-code">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" id="qrSvg"></svg>
+    </div>
+    <div class="addr-display" id="receiveAddr">—</div>
+    <button class="copy-btn" style="width:100%;margin-bottom:10px;" onclick="copyReceiveAddr()">📋 Copy Address</button>
+    <div style="font-size:0.7rem;color:var(--muted);text-align:center;font-family:'Space Mono',monospace;margin-bottom:16px;">⚠ DEMO ADDRESS — For presentation only</div>
+    <button class="btn-close" onclick="closeReceive()">Close</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">
+  <span id="notifIcon">✓</span>
+  <span id="notifMsg">Done</span>
+</div>
+
+<!-- INCOMING ALERT -->
+<div class="incoming-alert" id="incomingAlert">
+  <div class="ia-label">⬇ Incoming Transfer</div>
+  <div class="ia-amount" id="iaAmount">+0.00000000 ₿</div>
+  <div class="ia-from" id="iaFrom">from: —</div>
+</div>
+
+<script>
+const BTC_PRICE = 67432;
+const FEE = 0.000024;
+
+const USERS = [
+  { id: 'ada', name: 'Sophia Petal', avatar: '👩🏾', pin: '1234',
+    balance: 0.15234800,
+    addr: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    color: '#f7931a', txHistory: [] },
+  { id: 'emeka', name: 'Emeka Nwosu', avatar: '👨🏿', pin: '2222',
+    balance: 0.08720100,
+    addr: 'bc1q34aq5j7nkq8z5fq5j23kx8p9vk43gm2h4jnxlp',
+    color: '#4fc3f7', txHistory: [] },
+  { id: 'fatima', name: 'Fatima Bello', avatar: '👩🏽', pin: '3333',
+    balance: 0.21500000,
+    addr: 'bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq',
+    color: '#ab47bc', txHistory: [] },
+  { id: 'david', name: 'David Eze', avatar: '👨🏾', pin: '4444',
+    balance: 0.05100500,
+    addr: 'bc1qcr8te4kr609gcawutmrza0j4xv80jy8zeqchgx',
+    color: '#00e676', txHistory: [] },
+];
+
+// Simulated received transactions that others have "received" (view-only)
+const RECEIVED_LOG = {};
+USERS.forEach(u => RECEIVED_LOG[u.id] = []);
+
+let currentUser = null;
+let selectedRecipient = null;
+let pendingTx = null;
+
+// ── LOGIN ──
+function buildLoginGrid() {
+  const grid = document.getElementById('userGrid');
+  grid.innerHTML = '';
+  USERS.forEach(u => {
+    const btn = document.createElement('button');
+    btn.className = 'user-btn';
+    btn.id = 'ubtn_' + u.id;
+    btn.innerHTML = `
+      <div class="avatar" style="background:${u.color}22">${u.avatar}</div>
+      <div class="uname">${u.name}</div>
+      <div class="ubal">₿ ${u.balance.toFixed(8)}</div>
+    `;
+    btn.onclick = () => selectUser(u.id);
+    grid.appendChild(btn);
+  });
+}
+
+function selectUser(id) {
+  document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('ubtn_' + id).classList.add('selected');
+  currentUser = USERS.find(u => u.id === id);
+  document.getElementById('passcodeInput').value = currentUser.pin;
+}
+
+function doLogin() {
+  const pin = document.getElementById('passcodeInput').value;
+  if (!currentUser) {
+    // Try find by pin
+    const u = USERS.find(x => x.pin === pin);
+    if (u) { currentUser = u; }
+    else { showNotif('❌', 'Select an account first', 'red'); return; }
+  }
+  if (pin !== currentUser.pin && pin !== '') {
+    showNotif('❌', 'Wrong passcode', 'red'); return;
+  }
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  renderApp();
+}
+
+function doLogout() {
+  currentUser = null; selectedRecipient = null;
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.querySelectorAll('.user-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('passcodeInput').value = '';
+}
+
+// ── RENDER APP ──
+function renderApp() {
+  const u = currentUser;
+  document.getElementById('chipAvatar').textContent = u.avatar;
+  document.getElementById('chipName').textContent = u.name;
+  document.getElementById('balBTC').textContent = u.balance.toFixed(8) + ' ₿';
+  document.getElementById('balUSD').textContent = '≈ $' + (u.balance * BTC_PRICE).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' USD';
+  document.getElementById('myAddr').textContent = u.addr;
+  document.getElementById('receiveAddr').textContent = u.addr;
+  renderRecipients();
+  renderTxList();
+  renderStats();
+  renderHelped();
+  generateQR(u.addr);
+}
+
+function renderRecipients() {
+  const list = document.getElementById('recipientList');
+  list.innerHTML = '';
+  USERS.filter(u => u.id !== currentUser.id).forEach(u => {
+    const item = document.createElement('div');
+    item.className = 'recipient-item';
+    item.id = 'ri_' + u.id;
+    item.innerHTML = `
+      <span style="font-size:22px">${u.avatar}</span>
+      <div style="flex:1;min-width:0;">
+        <div class="r-name">${u.name}</div>
+        <div class="r-addr">${u.addr.slice(0,20)}...${u.addr.slice(-6)}</div>
+      </div>
+    `;
+    item.onclick = () => chooseRecipient(u.id);
+    list.appendChild(item);
+  });
+}
+
+function chooseRecipient(id) {
+  document.querySelectorAll('.recipient-item').forEach(r => r.classList.remove('selected'));
+  document.getElementById('ri_' + id).classList.add('selected');
+  selectedRecipient = USERS.find(u => u.id === id);
+  document.getElementById('customAddrInput').value = '';
+}
+
+function selectCustomAddr() {
+  document.querySelectorAll('.recipient-item').forEach(r => r.classList.remove('selected'));
+  selectedRecipient = { id: 'custom', name: 'External Wallet', addr: document.getElementById('customAddrInput').value, avatar: '🌐' };
+}
+
+function renderTxList() {
+  const list = document.getElementById('txList');
+  const txs = currentUser.txHistory;
+  if (txs.length === 0) {
+    list.innerHTML = '<div class="empty-tx">// No transactions yet<br>Start by sending or receiving BTC</div>';
+    return;
+  }
+  list.innerHTML = '';
+  [...txs].reverse().forEach(tx => {
+    const item = document.createElement('div');
+    item.className = 'tx-item';
+    const isOut = tx.type === 'out';
+    item.innerHTML = `
+      <div class="tx-icon ${isOut ? 'out' : 'in'}">${isOut ? '⬆' : '⬇'}</div>
+      <div class="tx-info">
+        <div class="tx-title">${isOut ? 'Sent to ' + tx.toName : 'Received from ' + tx.fromName}</div>
+        <div class="tx-meta">${tx.time}</div>
+        <div class="tx-hash">txid: ${tx.hash}</div>
+        <span class="tx-status ${tx.confirmed ? 'confirmed' : 'pending'}">${tx.confirmed ? '✓ Confirmed' : '⏳ Pending'}</span>
+      </div>
+      <div class="tx-amount">
+        <div class="btc ${isOut ? 'out' : 'in'}">${isOut ? '-' : '+'}${tx.amount.toFixed(8)} ₿</div>
+        <div class="usd">${isOut ? '-' : '+'}$${(tx.amount * BTC_PRICE).toFixed(2)}</div>
+      </div>
+    `;
+    list.appendChild(item);
+  });
+}
+
+function renderStats() {
+  const txs = currentUser.txHistory;
+  const sent = txs.filter(t => t.type === 'out').reduce((a, t) => a + t.amount, 0);
+  const recv = txs.filter(t => t.type === 'in').reduce((a, t) => a + t.amount, 0);
+  document.getElementById('statSent').textContent = sent.toFixed(4);
+  document.getElementById('statReceived').textContent = recv.toFixed(4);
+  document.getElementById('statTxCount').textContent = txs.length;
+}
+
+function renderHelped() {
+  const list = document.getElementById('helpedList');
+  const msgs = [
+    'Transfer received successfully ✓',
+    'Payment confirmed on chain',
+    'Funds received, thank you!',
+    'Transaction noted in ledger',
+    'Balance updated (view only)',
+    'Received! Cannot spend demo funds.',
+  ];
+  const allReceived = [];
+  USERS.forEach(u => {
+    RECEIVED_LOG[u.id].forEach(log => allReceived.push({ ...log, user: u }));
+  });
+  if (allReceived.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:0.78rem;text-align:center;padding:10px;font-family:\'Space Mono\',monospace;">No transfers yet</div>';
+    return;
+  }
+  list.innerHTML = '';
+  [...allReceived].reverse().forEach(log => {
+    const item = document.createElement('div');
+    item.className = 'helped-item';
+    item.innerHTML = `
+      <span class="h-avatar">${log.user.avatar}</span>
+      <div style="flex:1">
+        <div class="h-name">${log.user.name}</div>
+        <div class="h-msg">${msgs[Math.floor(Math.random() * msgs.length)]}</div>
+      </div>
+      <span class="h-tag">+${log.amount.toFixed(5)} ₿</span>
+    `;
+    list.appendChild(item);
+  });
+}
+
+// ── SEND ──
+function openSend() {
+  document.getElementById('sendPanel').scrollIntoView({ behavior: 'smooth' });
+}
+
+function updateAmountPreview() {
+  const amt = parseFloat(document.getElementById('sendAmount').value) || 0;
+  document.getElementById('usdEquiv').textContent = '≈ $' + (amt * BTC_PRICE).toLocaleString('en-US', {minimumFractionDigits:2}) + ' USD';
+}
+
+function setQuick(v) {
+  document.getElementById('sendAmount').value = v;
+  updateAmountPreview();
+}
+
+function setMaxSend() {
+  const max = Math.max(0, currentUser.balance - FEE - 0.000001);
+  document.getElementById('sendAmount').value = max.toFixed(8);
+  updateAmountPreview();
+}
+
+function initiateSend() {
+  const amt = parseFloat(document.getElementById('sendAmount').value);
+  if (!amt || amt <= 0) { showNotif('❌', 'Enter a valid amount', 'red'); return; }
+  if (!selectedRecipient) { showNotif('❌', 'Select a recipient', 'red'); return; }
+  if (selectedRecipient.id === currentUser.id) { showNotif('❌', 'Cannot send to yourself', 'red'); return; }
+  if (amt + FEE > currentUser.balance) { showNotif('❌', 'Insufficient balance', 'red'); return; }
+  if (amt < 0.00001) { showNotif('❌', 'Minimum 0.00001 BTC', 'red'); return; }
+
+  pendingTx = { amt, recipient: selectedRecipient };
+  const addrDisplay = selectedRecipient.addr ? (selectedRecipient.addr.slice(0,16) + '...' + selectedRecipient.addr.slice(-6)) : '—';
+  document.getElementById('cTo').textContent = selectedRecipient.name;
+  document.getElementById('cAddr').textContent = selectedRecipient.addr || '—';
+  document.getElementById('cAmt').textContent = amt.toFixed(8) + ' BTC ($' + (amt * BTC_PRICE).toFixed(2) + ')';
+  document.getElementById('cTotal').textContent = (amt + FEE).toFixed(8) + ' BTC';
+  document.getElementById('confirmModal').classList.add('show');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('show');
+}
+
+function generateTxHash() {
+  const chars = '0123456789abcdef';
+  return Array.from({length: 64}, () => chars[Math.floor(Math.random() * 16)]).join('');
+}
+
+function executeTransfer() {
+  if (!pendingTx) return;
+  const { amt, recipient } = pendingTx;
+  const hash = generateTxHash();
+  const now = new Date();
+  const timeStr = now.toLocaleString('en-GB', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  // Deduct from sender
+  currentUser.balance -= (amt + FEE);
+
+  // Add tx to sender
+  currentUser.txHistory.push({
+    type: 'out', amount: amt, toName: recipient.name,
+    addr: recipient.addr, hash, time: timeStr, confirmed: false
+  });
+
+  // If recipient is a demo user, add incoming tx
+  if (recipient.id !== 'custom') {
+    const recUser = USERS.find(u => u.id === recipient.id);
+    if (recUser) {
+      recUser.txHistory.push({
+        type: 'in', amount: amt, fromName: currentUser.name,
+        hash, time: timeStr, confirmed: false
+      });
+      // Log to received log
+      RECEIVED_LOG[recUser.id].push({ amount: amt, from: currentUser.name, time: timeStr });
+    }
+  }
+
+  closeConfirm();
+
+  // Show receipt
+  document.getElementById('rAmt').textContent = amt.toFixed(8) + ' ₿';
+  document.getElementById('rUsd').textContent = '≈ $' + (amt * BTC_PRICE).toLocaleString('en-US', {minimumFractionDigits:2}) + ' USD';
+  document.getElementById('rHash').textContent = hash;
+  document.getElementById('rTo').textContent = recipient.name;
+  document.getElementById('rAddr').textContent = recipient.addr || '—';
+  document.getElementById('rTime').textContent = timeStr;
+  document.getElementById('receiptModal').classList.add('show');
+
+  // Confirm after delay
+  setTimeout(() => {
+    const tx = currentUser.txHistory[currentUser.txHistory.length - 1];
+    if (tx) tx.confirmed = true;
+    if (recipient.id !== 'custom') {
+      const recUser = USERS.find(u => u.id === recipient.id);
+      if (recUser && recUser.txHistory.length > 0) {
+        recUser.txHistory[recUser.txHistory.length - 1].confirmed = true;
+      }
+    }
+    renderTxList();
+  }, 8000);
+
+  renderApp();
+  document.getElementById('sendAmount').value = '';
+  document.getElementById('usdEquiv').textContent = '≈ $0.00 USD';
+  pendingTx = null;
+
+  showNotif('✓', 'Transaction broadcast!', 'green');
+}
+
+function closeReceipt() {
+  document.getElementById('receiptModal').classList.remove('show');
+}
+
+// ── RECEIVE ──
+function openReceive() {
+  document.getElementById('receiveModal').classList.add('show');
+}
+
+function closeReceive() {
+  document.getElementById('receiveModal').classList.remove('show');
+}
+
+function copyAddr() {
+  navigator.clipboard.writeText(currentUser.addr).catch(() => {});
+  showNotif('📋', 'Address copied!', 'orange');
+}
+
+function copyReceiveAddr() {
+  navigator.clipboard.writeText(currentUser.addr).catch(() => {});
+  showNotif('📋', 'Address copied!', 'orange');
+}
+
+// ── QR CODE (simple pixel QR) ──
+function generateQR(text) {
+  const svg = document.getElementById('qrSvg');
+  svg.innerHTML = '';
+  // Simple decorative QR pattern (visual only)
+  const size = 21;
+  const cell = 100 / size;
+  const pattern = [];
+  for (let i = 0; i < size; i++) {
+    pattern[i] = [];
+    for (let j = 0; j < size; j++) {
+      // Finder patterns
+      const inFinder = (i < 7 && j < 7) || (i < 7 && j > 13) || (i > 13 && j < 7);
+      const onFinderBorder = (i === 0 || i === 6 || j === 0 || j === 6) && i < 7 && j < 7;
+      const onFinderBorder2 = (i === 0 || i === 6 || j === 14 || j === 20) && i < 7 && j > 13;
+      const onFinderBorder3 = (i === 14 || i === 20 || j === 0 || j === 6) && i > 13 && j < 7;
+      // Random data modules
+      const hash = (text.charCodeAt(i % text.length) ^ text.charCodeAt(j % text.length) ^ (i * 7 + j * 13)) % 2;
+      pattern[i][j] = inFinder ? (onFinderBorder || onFinderBorder2 || onFinderBorder3 ? 1 : (i === 2 || i === 3 || i === 4) && (j === 2 || j === 3 || j === 4) ? 1 : 0) : hash;
+    }
+  }
+  for (let i = 0; i < size; i++) {
+    for (let j = 0; j < size; j++) {
+      if (pattern[i][j]) {
+        const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        rect.setAttribute('x', j * cell);
+        rect.setAttribute('y', i * cell);
+        rect.setAttribute('width', cell);
+        rect.setAttribute('height', cell);
+        rect.setAttribute('fill', '#0a0a0f');
+        svg.appendChild(rect);
+      }
+    }
+  }
+}
+
+// ── NOTIFICATION ──
+function showNotif(icon, msg, type) {
+  const n = document.getElementById('notif');
+  document.getElementById('notifIcon').textContent = icon;
+  document.getElementById('notifMsg').textContent = msg;
+  n.className = 'notif ' + type + ' show';
+  setTimeout(() => n.classList.remove('show'), 3000);
+}
+
+// ── TICKER ──
+function animateTicker() {
+  const base = 67432;
+  const change = (Math.random() - 0.5) * 200;
+  const price = base + change;
+  document.getElementById('btcPrice').textContent = '$' + price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const pct = (change / base * 100).toFixed(2);
+  const el = document.getElementById('btcChange');
+  if (change >= 0) { el.textContent = '+' + pct + '%'; el.className = 't-change up'; }
+  else { el.textContent = pct + '%'; el.className = 't-change down'; }
+  // Block height
+  const bh = parseInt(document.getElementById('blockHeight').textContent.replace(/,/g, ''));
+  if (Math.random() > 0.95) {
+    document.getElementById('blockHeight').textContent = (bh + 1).toLocaleString();
+  }
+}
+
+// ── INCOMING SIMULATION (shows when another user would see it) ──
+// This fires an "incoming" visual for the logged-in user after they refresh via logout/login
+// Also shows a demo incoming notification to show off the feature
+
+setInterval(animateTicker, 2000);
+
+// ── INIT ──
+buildLoginGrid();
+// Auto-select first user
+selectUser('ada');
+</script>
+</body>
+</html>
